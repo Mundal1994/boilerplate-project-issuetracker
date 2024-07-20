@@ -62,19 +62,37 @@ module.exports = function (app) {
     
     .put(function (req, res){
       let project = req.params.project;
+      const input = req.query;
+      const id = input._id;
 
-      const currentDate = new Date().toISOString();
+      if (id == null) {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.json({ error: 'missing _id' });
+        return;
+      }
+
+      if (Object.keys(input).length === 1) {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.json({ error: 'no update field(s) sent', '_id': id });
+        return;
+      }
+
+      let result = req.body;
+      for (let key in input) {
+        if (key == '_id') {
+          continue;
+        }
+        result[key] = input[key];
+      }
+      result['updated_on'] = new Date().toISOString();
       
-      // with an _id and one or more fields to update. On success, the updated_on field should be updated, and returned should be {  result: 'successfully updated', '_id': _id }.
-      // error handling: does not include an _id, the return value is { error: 'missing _id' }.
-      // does not include update fields, the return value is { error: 'no update field(s) sent', '_id': _id }. On any other error, the return value is { error: 'could not update', '_id': _id }.
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.json({ result: 'successfully updated', '_id': id });
     })
     
     .delete(function (req, res){
       let project = req.params.project;
 
-      //You can send a DELETE request to /api/issues/{projectname} with an _id to delete an issue. If no _id is sent, the return value is { error: 'missing _id' }. On success, the return value is { result: 'successfully deleted', '_id': _id }. On failure, the return value is { error: 'could not delete', '_id': _id }.
-      
     });
     
 };

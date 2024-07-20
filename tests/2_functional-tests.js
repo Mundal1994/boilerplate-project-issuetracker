@@ -162,6 +162,54 @@ suite('Functional Tests', function() {
       });
   });
   suite('PUT /api/issues/:project calls', function () {
+    test('Test PUT /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa&issue_title=Error&issue_text=Errors.', function(done) {
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa&issue_title=Error&issue_text=Errors.')
+          .send({
+            '_id': 'bn0zdgznxzf7ozxxcfcvsbwa',
+            'issue_title': 'Fix error in posting data',
+            'issue_text': 'When we post data it has an error.',
+            'created_on': '2024-07-20T15:21:11.838Z',
+            'updated_on': '2024-07-20T15:21:11.838Z',
+            'created_by': 'Joe',
+            'assigned_to': 'Joe',
+            'open': true,
+            'status_text': 'In QA'
+            })
+          .end(function(err, res) {
+              assert.equal(res.status, 200);
+              assert.equal(res.body.result, 'successfully updated');
+              assert.equal(res.body._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
+              done();
+          })
+      });
+    test('Test PUT /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa', function(done) {
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa')
+          .send(currentDatabase)
+          .end(function(err, res) {
+              assert.equal(res.status, 200);
+              assert.equal(res.body.error, 'no update field(s) sent');
+              assert.equal(res.body._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
+              done();
+          })
+    });
+    test('Test PUT /api/issues/apitest', function(done) {
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/apitest')
+          .send(currentDatabase)
+          .end(function(err, res) {
+              assert.equal(res.status, 200);
+              assert.equal(res.body.error, 'missing _id');
+              done();
+          })
+      });
     //.put('/travellers) 
     //.send({"surname": "Colombo"})
   });
