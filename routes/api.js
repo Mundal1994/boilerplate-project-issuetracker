@@ -9,7 +9,9 @@ module.exports = function (app) {
       let result = req.body;
       const input = req.query;
       if (Object.keys(input).length === 0 && input.constructor === Object) {
-        return (result);
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.json(result);
+        return;
       }
 
       for (let key in input) {
@@ -23,7 +25,8 @@ module.exports = function (app) {
         
         result = filtered;
       }
-      return (result);
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.json(result);
     })
     
     .post(function (req, res){

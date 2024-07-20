@@ -129,19 +129,34 @@ suite('Functional Tests', function() {
           .send(currentDatabase)
           .end(function(err, res) {
               assert.equal(res.status, 200);
-              // add assert.equal
+              assert.equal(res.body[0]._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
+              assert.equal(res.body[1]._id, 'q2zlh4076etyr5wezqtupb76');
+              assert.equal(res.body[2]._id, 'q2zlh4076etyr5we25tupb76');
               done();
           })
       });
-    test('Test GET /api/issues/apitest?open=true&assigned_to=Joe', function(done) {
+    test('Test GET /api/issues/apitest?open=true&created_by=Joe', function(done) {
         chai
           .request(server)
           .keepOpen()
-          .get('/api/issues/apitest?open=true&assigned_to=Joe')
+          .get('/api/issues/apitest?open=true&created_by=Joe')
           .send(currentDatabase)
           .end(function(err, res) {
               assert.equal(res.status, 200);
-              // add assert.equal
+              assert.equal(res.body[0]._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
+              assert.equal(res.body[1]._id, 'q2zlh4076etyr5wezqtupb76');
+              done();
+          })
+      });
+    test('Test GET /api/issues/apitest?open=false', function(done) {
+        chai
+          .request(server)
+          .keepOpen()
+          .get('/api/issues/apitest?open=false')
+          .send(currentDatabase)
+          .end(function(err, res) {
+              assert.equal(res.status, 200);
+              assert.equal(res.body.length, 0);
               done();
           })
       });
