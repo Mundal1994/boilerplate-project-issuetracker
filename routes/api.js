@@ -5,6 +5,25 @@ module.exports = function (app) {
   app.route('/api/issues/:project')
   
     .get(function (req, res){
+      let project = req.params.project;
+      let result = req.body;
+      const input = req.query;
+      if (Object.keys(input).length === 0 && input.constructor === Object) {
+        return (result);
+      }
+
+      for (let key in input) {
+        let filtered = [];
+        
+        for (let i = 0; i < result.length; i++) {
+          if (result[i][key].toString() == input[key]) {
+            filtered.push(result[i]);
+          }
+        }
+        
+        result = filtered;
+      }
+      return (result);
     })
     
     .post(function (req, res){
@@ -34,7 +53,6 @@ module.exports = function (app) {
         "open": true,
         "status_text": req.body.status_text == null ? '' : req.body.status_text
       };
-      console.log("result: ", result);
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.json(result);
     })
