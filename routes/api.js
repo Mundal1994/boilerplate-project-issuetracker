@@ -24,12 +24,10 @@ const routes = function (app) {
       const input = req.query;
 
       IssueTracker.find(input, (err, elements) => {
-        if (err) {
-          return;
+        if (elements) {
+          res.setHeader("Access-Control-Allow-Origin", "*");
+          res.json(elements);
         }
-        
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.json(elements);
       });
     })
     
@@ -59,7 +57,7 @@ const routes = function (app) {
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.json(result);
     })
-    /*
+    
     .put(function (req, res){
       let project = req.params.project;
       const input = req.query;
@@ -76,19 +74,13 @@ const routes = function (app) {
         res.json({ error: 'no update field(s) sent', '_id': id });
         return;
       }
-
-      db.findOne({'_id': id}, (err, elem) => {
+      
+      IssueTracker.findByIdAndUpdate(id, input, (err, elem) => {
         if (err) {
+          res.setHeader("Access-Control-Allow-Origin", "*");
+          res.json({ result: 'could not update', '_id': id });
           return;
         }
-
-        for (let key in input) {
-          if (key == '_id') {
-            continue;
-          }
-          elem[key] = input[key];
-        }
-        elem['updated_on'] = new Date().toISOString();
       
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.json({ result: 'successfully updated', '_id': id });
@@ -96,7 +88,6 @@ const routes = function (app) {
     })
     
     .delete(function (req, res){
-      let project = req.params.project;
       const id = input._id;
 
       if (id == null) {
@@ -113,9 +104,8 @@ const routes = function (app) {
           res.setHeader("Access-Control-Allow-Origin", "*");
           res.json({ result: 'successfully deleted', '_id': _id });
         }
-      }) 
-    });*/
-    
+      })
+    });
 };
 
 module.exports.routes = routes;
