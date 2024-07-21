@@ -1,6 +1,5 @@
 'use strict';
 
-const { MongoClient } = require('mongodb');
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -15,30 +14,25 @@ const issueSchema = new mongoose.Schema({
   }
 );
 
-let IssueTracker = mongoose.model('IssueTracker', issueSchema);
+const IssueTracker = mongoose.model('IssueTracker', issueSchema);
 
-module.exports = function (app) {
+const routes = function (app) {
 
   app.route('/api/issues/:project')
   
     .get(function (req, res){
-      let project = req.params.project;
       const input = req.query;
-      if (Object.keys(input).length === 0 && input.constructor === Object) {
+      /*if (Object.keys(input).length === 0 && input.constructor === Object) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.json([{}]);
         return;
-      }
+      }*/
 
-      if (!(project in db)) {
-        console.log("project doesn't exist");
-        return;
-      }
-
-      db.filtered(input, (err, elements) => {
+      IssueTracker.find(input, (err, elements) => {
         if (err) {
           return;
         }
+        //console.log("issue filetered", elements);
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.json(elements);
       });
@@ -86,7 +80,7 @@ module.exports = function (app) {
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.json(result);
     })
-    
+    /*
     .put(function (req, res){
       let project = req.params.project;
       const input = req.query;
@@ -141,6 +135,9 @@ module.exports = function (app) {
           res.json({ result: 'successfully deleted', '_id': _id });
         }
       }) 
-    });
+    });*/
     
 };
+
+module.exports.routes = routes;
+module.exports.IssueTracker = IssueTracker;

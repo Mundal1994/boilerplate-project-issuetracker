@@ -2,6 +2,8 @@ const chaiHttp = require('chai-http');
 const chai = require('chai');
 const assert = chai.assert;
 const server = require('../server');
+const apiRoutes = require('../routes/api');
+const IssueTracker = apiRoutes.IssueTracker;
 
 chai.use(chaiHttp);
 
@@ -87,110 +89,104 @@ suite('Functional Tests', function() {
           })
       });
   });
-  const currentDatabase = [{
-    '_id': 'bn0zdgznxzf7ozxxcfcvsbwa',
-    'issue_title': 'Fix error in posting data',
+  const currentDatabase = [new IssueTracker({
+    'issue_title': 'First Issue',
     'issue_text': 'When we post data it has an error.',
-    'created_on': '2024-07-20T15:21:11.838Z',
-    'updated_on': '2024-07-20T15:21:11.838Z',
+    'created_on': new Date(),
+    'updated_on': new Date(),
     'created_by': 'Joe',
     'assigned_to': 'Joe',
     'open': true,
     'status_text': 'In QA'
-  },
-  {
-    '_id': 'q2zlh4076etyr5wezqtupb76',
-    'issue_title': 'Fix error in posting data',
+  }),
+  new IssueTracker({
+    'issue_title': 'Second Issue',
     'issue_text': 'When we post data it has an error.',
-    'created_on': '2024-07-20T15:21:11.865Z',
-    'updated_on': '2024-07-20T15:21:11.865Z',
+    'created_on': new Date(),
+    'updated_on': new Date(),
     'created_by': 'Joe',
     'assigned_to': '',
     'open': true,
     'status_text': ''
-  },
-  {
-    '_id': 'q2zlh4076etyr5we25tupb76',
-    'issue_title': 'Guitar issue',
+  }),
+  new IssueTracker({
+    'issue_title': 'Third guitar Issue',
     'issue_text': 'Issues of missing guitar stand.',
-    'created_on': '2024-07-20T15:22:11.865Z',
-    'updated_on': '2024-07-20T15:22:11.865Z',
+    'created_on': new Date(),
+    'updated_on': new Date(),
     'created_by': 'Ronan',
     'assigned_to': 'Me',
     'open': true,
     'status_text': ''
-  }];
+  })];
   suite('GET /api/issues/:project calls', function () {
     test('Test GET /api/issues/apitest', function(done) {
-        chai
-          .request(server)
-          .keepOpen()
-          .get('/api/issues/apitest')
-          .send(currentDatabase)
-          .end(function(err, res) {
-              assert.equal(res.status, 200);
-              assert.equal(res.body[0]._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
-              assert.equal(res.body[1]._id, 'q2zlh4076etyr5wezqtupb76');
-              assert.equal(res.body[2]._id, 'q2zlh4076etyr5we25tupb76');
-              done();
-          })
+      IssueTracker.deleteMany({}, (err, data) => {});
+      IssueTracker.create(currentDatabase, (err, save) => {});    
+      chai
+        .request(server)
+        .keepOpen()
+        .get('/api/issues/apitest')
+        .send(currentDatabase)
+        .end(function(err, res) {
+          assert.equal(res.status, 200);
+          assert.strictEqual(res.body[0].issue_title, 'First Issue');
+          assert.strictEqual(res.body[1].issue_title, 'Second Issue');
+          assert.strictEqual(res.body[2].issue_title, 'Third guitar Issue');
+          done();
+        })
       });
     test('Test GET /api/issues/apitest?open=true&created_by=Joe', function(done) {
-        chai
-          .request(server)
-          .keepOpen()
-          .get('/api/issues/apitest?open=true&created_by=Joe')
-          .send(currentDatabase)
-          .end(function(err, res) {
-              assert.equal(res.status, 200);
-              assert.equal(res.body[0]._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
-              assert.equal(res.body[1]._id, 'q2zlh4076etyr5wezqtupb76');
-              done();
-          })
+      IssueTracker.deleteMany({}, (err, data) => {});
+      IssueTracker.create(currentDatabase, (err, save) => {});    
+      chai
+        .request(server)
+        .keepOpen()
+        .get('/api/issues/apitest?open=true&created_by=Joe')
+        .end(function(err, res) {
+          assert.strictEqual(res.status, 200);
+          assert.strictEqual(res.body[0].issue_title, 'First Issue');
+          assert.strictEqual(res.body[1].issue_title, 'Second Issue');
+          done();
+        })
       });
     test('Test GET /api/issues/apitest?open=false', function(done) {
-        chai
-          .request(server)
-          .keepOpen()
-          .get('/api/issues/apitest?open=false')
-          .send(currentDatabase)
-          .end(function(err, res) {
-              assert.equal(res.status, 200);
-              assert.equal(res.body.length, 0);
-              done();
-          })
+      IssueTracker.deleteMany({}, (err, data) => {});
+      IssueTracker.create(currentDatabase, (err, save) => {});    
+      chai
+        .request(server)
+        .keepOpen()
+        .get('/api/issues/apitest?open=false')
+        .send(currentDatabase)
+        .end(function(err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.body.length, 0);
+            done();
+        })
       });
   });
   suite('PUT /api/issues/:project calls', function () {
     test('Test PUT /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa&issue_title=Error&issue_text=Errors.', function(done) {
-        chai
-          .request(server)
-          .keepOpen()
-          .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa&issue_title=Error&issue_text=Errors.')
-          .send({
-            '_id': 'bn0zdgznxzf7ozxxcfcvsbwa',
-            'issue_title': 'Fix error in posting data',
-            'issue_text': 'When we post data it has an error.',
-            'created_on': '2024-07-20T15:21:11.838Z',
-            'updated_on': '2024-07-20T15:21:11.838Z',
-            'created_by': 'Joe',
-            'assigned_to': 'Joe',
-            'open': true,
-            'status_text': 'In QA'
-            })
-          .end(function(err, res) {
-              assert.equal(res.status, 200);
-              assert.equal(res.body.result, 'successfully updated');
-              assert.equal(res.body._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
-              done();
-          })
+      IssueTracker.deleteMany({}, (err, data) => {});
+      IssueTracker.create(currentDatabase, (err, save) => {});    
+      chai
+        .request(server)
+        .keepOpen()
+        .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa&issue_title=Error&issue_text=Errors.')
+        .end(function(err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.body.result, 'successfully updated');
+            assert.equal(res.body._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
+            done();
+        })
       });
     test('Test PUT /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa', function(done) {
-        chai
+      IssueTracker.deleteMany({}, (err, data) => {});
+      IssueTracker.create(currentDatabase, (err, save) => {});    
+      chai
           .request(server)
           .keepOpen()
           .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa')
-          .send(currentDatabase)
           .end(function(err, res) {
               assert.equal(res.status, 200);
               assert.equal(res.body.error, 'no update field(s) sent');
@@ -199,11 +195,12 @@ suite('Functional Tests', function() {
           })
     });
     test('Test PUT /api/issues/apitest', function(done) {
-        chai
+      IssueTracker.deleteMany({}, (err, data) => {});
+      IssueTracker.create(currentDatabase, (err, save) => {});    
+      chai
           .request(server)
           .keepOpen()
           .put('/api/issues/apitest')
-          .send(currentDatabase)
           .end(function(err, res) {
               assert.equal(res.status, 200);
               assert.equal(res.body.error, 'missing _id');
@@ -213,11 +210,12 @@ suite('Functional Tests', function() {
   });
   suite('DELETE /api/issues/:project calls', function () {
     test('Test Delete /api/issues/apitest', function(done) {
-        chai
+      IssueTracker.deleteMany({}, (err, data) => {});
+      IssueTracker.create(currentDatabase, (err, save) => {});    
+      chai
           .request(server)
           .keepOpen()
           .put('/api/issues/apitest')
-          .send(currentDatabase)
           .end(function(err, res) {
               assert.equal(res.status, 200);
               assert.equal(res.body.error, 'missing _id');
@@ -225,11 +223,12 @@ suite('Functional Tests', function() {
           })
     });
     test('Test Delete /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa', function(done) {
-        chai
+      IssueTracker.deleteMany({}, (err, data) => {});
+      IssueTracker.create(currentDatabase, (err, save) => {});    
+      chai
           .request(server)
           .keepOpen()
           .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa')
-          .send(currentDatabase)
           .end(function(err, res) {
               assert.equal(res.status, 200);
               assert.equal(res.body.result, 'successfully deleted');
@@ -238,11 +237,12 @@ suite('Functional Tests', function() {
           })
       });
     test('Test Delete /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvs', function(done) {
-        chai
+      IssueTracker.deleteMany({}, (err, data) => {});
+      IssueTracker.create(currentDatabase, (err, save) => {});    
+      chai
           .request(server)
           .keepOpen()
           .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvs')
-          .send(currentDatabase)
           .end(function(err, res) {
               assert.equal(res.status, 200);
               assert.equal(res.body.error, 'could not delete');
@@ -251,5 +251,4 @@ suite('Functional Tests', function() {
           })
       });
   });
-  // at least 14 tests has to be made. 4 tests in each suit
 });
