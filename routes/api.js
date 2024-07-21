@@ -22,36 +22,15 @@ const routes = function (app) {
   
     .get(function (req, res){
       const input = req.query;
-      /*if (Object.keys(input).length === 0 && input.constructor === Object) {
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.json([{}]);
-        return;
-      }*/
 
       IssueTracker.find(input, (err, elements) => {
         if (err) {
           return;
         }
-        //console.log("issue filetered", elements);
+        
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.json(elements);
       });
-      /*
-      let result = db[project];
-      for (let key in input) {
-        let filtered = [];
-        
-        for (let i = 0; i < result.length; i++) {
-          if (result[i][key].toString() == input[key]) {
-            filtered.push(result[i]);
-          }
-        }
-        
-        result = filtered;
-      }
-      console.log(result);
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.json(result);*/
     })
     
     .post(function (req, res){
