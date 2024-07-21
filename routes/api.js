@@ -59,7 +59,6 @@ const routes = function (app) {
     })
     
     .put(function (req, res){
-      let project = req.params.project;
       const input = req.query;
       const id = input._id;
 
@@ -88,21 +87,22 @@ const routes = function (app) {
     })
     
     .delete(function (req, res){
+      const input = req.query;
       const id = input._id;
 
       if (id == null) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.json({ error: 'missing _id' });
+        return;
       }
 
-      db.findOne({'_id': id}, (err, elem) => {
+      IssueTracker.findByIdAndDelete(id, (err, elem) => {
         if (err) {
           res.setHeader("Access-Control-Allow-Origin", "*");
-          res.json({ error: 'could not delete', '_id': _id });
+          res.json({ error: 'could not delete', '_id': id });
         } else {
-          res.$(elem).remove();
           res.setHeader("Access-Control-Allow-Origin", "*");
-          res.json({ result: 'successfully deleted', '_id': _id });
+          res.json({ result: 'successfully deleted', '_id': id });
         }
       })
     });

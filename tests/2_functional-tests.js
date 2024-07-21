@@ -171,7 +171,7 @@ suite('Functional Tests', function() {
       });
   });*/
   suite('PUT /api/issues/:project calls', function () {
-    test('Test PUT /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa.', function(done) {
+    test('Test PUT /api/issues/apitest?_id=xxx.', function(done) {
       const currentDB = new IssueTracker({
         'issue_title': 'First Issue',
         'issue_text': 'When we post data it has an error.',
@@ -198,7 +198,7 @@ suite('Functional Tests', function() {
         }
       })
     });
-    test('Test PUT /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa&issue_title=Error&issue_text=Errors', function(done) {
+    test('Test PUT /api/issues/apitest?_id=xxx&issue_title=Error&issue_text=Errors', function(done) {
       const currentDB = new IssueTracker({
         'issue_title': 'First Issue',
         'issue_text': 'When we post data it has an error.',
@@ -237,48 +237,72 @@ suite('Functional Tests', function() {
               done();
           })
       });
-  });/*
+  });
   suite('DELETE /api/issues/:project calls', function () {
     test('Test Delete /api/issues/apitest', function(done) {
-      IssueTracker.deleteMany({}, (err, data) => {});
-      IssueTracker.create(currentDatabase, (err, save) => {});    
       chai
           .request(server)
           .keepOpen()
-          .put('/api/issues/apitest')
+          .delete('/api/issues/apitest')
           .end(function(err, res) {
-              assert.equal(res.status, 200);
-              assert.equal(res.body.error, 'missing _id');
-              done();
+            assert.equal(res.status, 200);
+            assert.equal(res.body.error, 'missing _id');
+            done();
           })
     });
-    test('Test Delete /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa', function(done) {
-      IssueTracker.deleteMany({}, (err, data) => {});
-      IssueTracker.create(currentDatabase, (err, save) => {});    
-      chai
+    test('Test Delete /api/issues/apitest?_id=xxx', function(done) {
+      const currentDB = new IssueTracker({
+        'issue_title': 'First Issue',
+        'issue_text': 'When we post data it has an error.',
+        'created_on': new Date(),
+        'updated_on': new Date(),
+        'created_by': 'Joe',
+        'assigned_to': 'Joe',
+        'open': true,
+        'status_text': 'In QA'
+      });
+      currentDB.save((err, info) => {
+        if (info) {
+          const id = currentDB._id.toString();
+          chai
           .request(server)
           .keepOpen()
-          .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa')
+          .delete('/api/issues/apitest?_id=' + id)
           .end(function(err, res) {
-              assert.equal(res.status, 200);
-              assert.equal(res.body.result, 'successfully deleted');
-              assert.equal(res.body._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
-              done();
+            const json = JSON.parse(res.text);
+            assert.equal(res.status, 200);
+            assert.equal(json.result, 'successfully deleted');
+            assert.equal(json._id, id);
+            done();
           })
+        }})
       });
-    test('Test Delete /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvs', function(done) {
-      IssueTracker.deleteMany({}, (err, data) => {});
-      IssueTracker.create(currentDatabase, (err, save) => {});    
-      chai
+    test('Test Delete /api/issues/apitest?_id=xxx1234', function(done) {
+      const currentDB = new IssueTracker({
+        'issue_title': 'First Issue',
+        'issue_text': 'When we post data it has an error.',
+        'created_on': new Date(),
+        'updated_on': new Date(),
+        'created_by': 'Joe',
+        'assigned_to': 'Joe',
+        'open': true,
+        'status_text': 'In QA'
+      });
+      currentDB.save((err, info) => {
+        if (info) {
+          const id = currentDB._id.toString();
+          chai
           .request(server)
           .keepOpen()
-          .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvs')
+          .delete('/api/issues/apitest?_id=' + id + '1234')
           .end(function(err, res) {
-              assert.equal(res.status, 200);
-              assert.equal(res.body.error, 'could not delete');
-              assert.equal(res.body._id, 'bn0zdgznxzf7ozxxcfcvs');
-              done();
+            const json = JSON.parse(res.text);
+            assert.equal(res.status, 200);
+            assert.equal(json.error, 'could not delete');
+            assert.equal(json._id, id + '1234');
+            done();
           })
+        }})
       });
-  });*/
+  });
 });
