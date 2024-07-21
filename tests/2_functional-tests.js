@@ -128,16 +128,7 @@ suite('Functional Tests', function() {
       .keepOpen()
       .get('/api/issues/apitest')
       .end(function(err, res) {
-        console.log("res: ", res.text, "res.body", res.body);
         const json = JSON.parse(res.text);
-        let object1 = json[0];
-        let object2 = json[1];
-        let object3 = json[2];
-        console.log("object1: ", object1);
-        console.log("object2: ", object2);
-        console.log("object3: ", object3);
-        console.log("length: ", Object.keys(json).length);
-        
         assert.equal(res.status, 200);
         assert.equal(Object.keys(json).length, 3);
         let i = 0;
