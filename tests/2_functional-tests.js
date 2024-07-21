@@ -210,10 +210,46 @@ suite('Functional Tests', function() {
               done();
           })
       });
-    //.put('/travellers) 
-    //.send({"surname": "Colombo"})
   });
   suite('DELETE /api/issues/:project calls', function () {
+    test('Test Delete /api/issues/apitest', function(done) {
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/apitest')
+          .send(currentDatabase)
+          .end(function(err, res) {
+              assert.equal(res.status, 200);
+              assert.equal(res.body.error, 'missing _id');
+              done();
+          })
+    });
+    test('Test Delete /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa', function(done) {
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvsbwa')
+          .send(currentDatabase)
+          .end(function(err, res) {
+              assert.equal(res.status, 200);
+              assert.equal(res.body.result, 'successfully deleted');
+              assert.equal(res.body._id, 'bn0zdgznxzf7ozxxcfcvsbwa');
+              done();
+          })
+      });
+    test('Test Delete /api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvs', function(done) {
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/apitest?_id=bn0zdgznxzf7ozxxcfcvs')
+          .send(currentDatabase)
+          .end(function(err, res) {
+              assert.equal(res.status, 200);
+              assert.equal(res.body.error, 'could not delete');
+              assert.equal(res.body._id, 'bn0zdgznxzf7ozxxcfcvs');
+              done();
+          })
+      });
   });
   // at least 14 tests has to be made. 4 tests in each suit
 });
