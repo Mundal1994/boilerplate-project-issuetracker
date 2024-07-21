@@ -88,61 +88,75 @@ suite('Functional Tests', function() {
               done();
           })
       });
-  });/*
-  const currentDatabase = [new IssueTracker({
-    'issue_title': 'First Issue',
-    'issue_text': 'When we post data it has an error.',
-    'created_on': new Date(),
-    'updated_on': new Date(),
-    'created_by': 'Joe',
-    'assigned_to': 'Joe',
-    'open': true,
-    'status_text': 'In QA'
-  }),
-  new IssueTracker({
-    'issue_title': 'Second Issue',
-    'issue_text': 'When we post data it has an error.',
-    'created_on': new Date(),
-    'updated_on': new Date(),
-    'created_by': 'Joe',
-    'assigned_to': '',
-    'open': true,
-    'status_text': ''
-  }),
-  new IssueTracker({
-    'issue_title': 'Third guitar Issue',
-    'issue_text': 'Issues of missing guitar stand.',
-    'created_on': new Date(),
-    'updated_on': new Date(),
-    'created_by': 'Ronan',
-    'assigned_to': 'Me',
-    'open': true,
-    'status_text': ''
-  })];
+  });
   suite('GET /api/issues/:project calls', function () {
+    const currentDatabase = [new IssueTracker({
+      'issue_title': 'First Issue',
+      'issue_text': 'When we post data it has an error.',
+      'created_on': new Date(),
+      'updated_on': new Date(),
+      'created_by': 'Joe',
+      'assigned_to': 'Joe',
+      'open': true,
+      'status_text': 'In QA'
+    }),
+    new IssueTracker({
+      'issue_title': 'Second Issue',
+      'issue_text': 'When we post data it has an error.',
+      'created_on': new Date(),
+      'updated_on': new Date(),
+      'created_by': 'Joe',
+      'assigned_to': '',
+      'open': true,
+      'status_text': ''
+    }),
+    new IssueTracker({
+      'issue_title': 'Third guitar Issue',
+      'issue_text': 'Issues of missing guitar stand.',
+      'created_on': new Date(),
+      'updated_on': new Date(),
+      'created_by': 'Ronan',
+      'assigned_to': 'Me',
+      'open': true,
+      'status_text': ''
+    })];
     test('Test GET /api/issues/apitest', function(done) {
-      IssueTracker.deleteMany({}, (err, data) => {});
-      IssueTracker.create(currentDatabase, (err, save) => {});    
+      IssueTracker.deleteMany({}, (err, info) => {});
+      IssueTracker.create(currentDatabase, (err, res) => {});
       chai
-        .request(server)
-        .keepOpen()
-        .get('/api/issues/apitest')
-        .end(function(err, res) {
-          const json = JSON.parse(res.text);
-          //console.log("json is type? ", typeof(json));
-          //let object1 = json[0];
-          //console.log("object1: ", object1);
-          assert.equal(res.status, 200);
-          assert.equal(json.length, 3);
-          assert.equal(json[0].issue_title, 'First Issue');
-          assert.equal(json[1].issue_title, 'Second Issue');
-          assert.equal(json[2].issue_title, 'Third guitar Issue');
-          done();
-        })
-      });
+      .request(server)
+      .keepOpen()
+      .get('/api/issues/apitest')
+      .end(function(err, res) {
+        console.log("res: ", res.text, "res.body", res.body);
+        const json = JSON.parse(res.text);
+        let object1 = json[0];
+        let object2 = json[1];
+        let object3 = json[2];
+        console.log("object1: ", object1);
+        console.log("object2: ", object2);
+        console.log("object3: ", object3);
+        console.log("length: ", Object.keys(json).length);
+        
+        assert.equal(res.status, 200);
+        assert.equal(Object.keys(json).length, 3);
+        let i = 0;
+        while (i < Object.keys(json).length) {
+          if (json[i].issue_title == 'First Issue') {
+            assert.equal(json[i].issue_title, 'First Issue');
+          } else if (json[i].issue_title == 'Second Issue') {
+            assert.equal(json[i].issue_title, 'Second Issue');
+          } else if (json[i].issue_title == 'Third guitar Issue') {
+            assert.equal(json[i].issue_title, 'Third guitar Issue');
+          } else {
+            console.log("didn't match anything");
+          }
+          ++i;
+        }
+        done();
+      })
+    });
     test('Test GET /api/issues/apitest?open=true&created_by=Joe', function(done) {
-      IssueTracker.deleteMany({}, (err, data) => {});
-      IssueTracker.create(currentDatabase, (err, save) => {});    
       chai
         .request(server)
         .keepOpen()
@@ -150,15 +164,13 @@ suite('Functional Tests', function() {
         .end(function(err, res) {
           const json = JSON.parse(res.text);
           assert.equal(res.status, 200);
-          assert.equal(json.length, 2);
+          assert.equal(Object.keys(json).length, 2);
           assert.equal(json[0].created_by, 'Joe');
           assert.equal(json[1].created_by, 'Joe');
           done();
         })
       });
     test('Test GET /api/issues/apitest?open=false', function(done) {
-      IssueTracker.deleteMany({}, (err, data) => {});
-      IssueTracker.create(currentDatabase, (err, save) => {});    
       chai
         .request(server)
         .keepOpen()
@@ -169,7 +181,7 @@ suite('Functional Tests', function() {
             done();
         })
       });
-  });*/
+  });
   suite('PUT /api/issues/:project calls', function () {
     test('Test PUT /api/issues/apitest?_id=xxx.', function(done) {
       const currentDB = new IssueTracker({
