@@ -2,10 +2,30 @@ const chaiHttp = require('chai-http');
 const chai = require('chai');
 const assert = chai.assert;
 const server = require('../server');
-const apiRoutes = require('../routes/api');
-const IssueTracker = apiRoutes.IssueTracker;
 
 chai.use(chaiHttp);
+
+const everyField={ 
+  "issue_title": "First Issue",
+  "issue_text": "When we post data it has an error.",
+  "created_by": "Joe",
+  "assigned_to": "Joe",
+  "status_text": "In QA"
+}
+const everyField2={ 
+  "issue_title": "Second Issue",
+  "issue_text": "This is a test text.",
+  "created_by": "Me",
+  "assigned_to": "Me",
+  "status_text": "This is unknown status"
+}
+const required={ 
+  "issue_title": "Third guitar Issue",
+  "issue_text": "When we post data it has an error.",
+  "created_by": "Joe"
+}
+
+let id = '';
 
 suite('Functional Tests', function() {
   suite('POST /api/issues/:project calls', function () {
@@ -14,20 +34,15 @@ suite('Functional Tests', function() {
         .request(server)
         .keepOpen()
         .post('/api/issues/apitest')
-        .send({ 
-            "issue_title": "Fix error in posting data",
-            "issue_text": "When we post data it has an error.",
-            "created_by": "Joe",
-            "assigned_to": "Joe",
-            "status_text": "In QA"
-          })
+        .send(everyField)
         .end(function(err, res) {
             assert.equal(res.status, 200);
-            assert.equal(res.body.issue_title, 'Fix error in posting data');
+            assert.equal(res.body.issue_title, 'First Issue');
             assert.equal(res.body.issue_text, 'When we post data it has an error.');
             assert.equal(res.body.created_by, 'Joe');
             assert.equal(res.body.assigned_to, 'Joe');
             assert.equal(res.body.status_text, 'In QA');
+            id = res.body._id;
             done();
         })
     });
@@ -36,16 +51,10 @@ suite('Functional Tests', function() {
           .request(server)
           .keepOpen()
           .post('/api/issues/apitest')
-          .send({ 
-              "issue_title": "This is a test title",
-              "issue_text": "This is a test text.",
-              "created_by": "Me",
-              "assigned_to": "Me",
-              "status_text": "This is unknown status"
-            })
+          .send(everyField2)
           .end(function(err, res) {
               assert.equal(res.status, 200);
-              assert.equal(res.body.issue_title, 'This is a test title');
+              assert.equal(res.body.issue_title, 'Second Issue');
               assert.equal(res.body.issue_text, 'This is a test text.');
               assert.equal(res.body.created_by, 'Me');
               assert.equal(res.body.assigned_to, 'Me');
@@ -58,19 +67,14 @@ suite('Functional Tests', function() {
           .request(server)
           .keepOpen()
           .post('/api/issues/apitest')
-          .send({ 
-              "issue_title": "Fix error in posting data",
-              "issue_text": "When we post data it has an error.",
-              "created_by": "Joe"
-            })
+          .send(required)
           .end(function(err, res) {
               assert.equal(res.status, 200);
-              assert.equal(res.body.issue_title, 'Fix error in posting data');
+              assert.equal(res.body.issue_title, 'Third guitar Issue');
               assert.equal(res.body.issue_text, 'When we post data it has an error.');
               assert.equal(res.body.created_by, 'Joe');
               assert.equal(res.body.assigned_to, '');
               assert.equal(res.body.status_text, '');
-              console.log("res.body.", res.body);
               done();
           })
       });
@@ -103,43 +107,12 @@ suite('Functional Tests', function() {
       });
   });
   suite('GET /api/issues/:project calls', function () {
-    const currentDatabase = [new IssueTracker({
-      'issue_title': 'First Issue',
-      'issue_text': 'When we post data it has an error.',
-      'created_on': new Date(),
-      'updated_on': new Date(),
-      'created_by': 'Joe',
-      'assigned_to': 'Joe',
-      'open': true,
-      'status_text': 'In QA'
-    }),
-    new IssueTracker({
-      'issue_title': 'Second Issue',
-      'issue_text': 'When we post data it has an error.',
-      'created_on': new Date(),
-      'updated_on': new Date(),
-      'created_by': 'Joe',
-      'assigned_to': '',
-      'open': true,
-      'status_text': ''
-    }),
-    new IssueTracker({
-      'issue_title': 'Third guitar Issue',
-      'issue_text': 'Issues of missing guitar stand.',
-      'created_on': new Date(),
-      'updated_on': new Date(),
-      'created_by': 'Ronan',
-      'assigned_to': 'Me',
-      'open': true,
-      'status_text': ''
-    })];
     test('Test GET /api/issues/apitest', function(done) {
-      IssueTracker.deleteMany({}, (err, info) => {});
-      IssueTracker.create(currentDatabase, (err, res) => {});
       chai
       .request(server)
       .keepOpen()
       .get('/api/issues/apitest')
+      .query()
       .end(function(err, res) {
         const json = JSON.parse(res.text);
         assert.equal(res.status, 200);
@@ -148,12 +121,13 @@ suite('Functional Tests', function() {
         while (i < Object.keys(json).length) {
           if (json[i].issue_title == 'First Issue') {
             assert.equal(json[i].issue_title, 'First Issue');
+            assert.hasAllKeys(json[i], ["_id", "issue_title", "issue_text", "created_on", "updated_on", "created_by", "assigned_to", "open", "status_text", "project"]);
           } else if (json[i].issue_title == 'Second Issue') {
             assert.equal(json[i].issue_title, 'Second Issue');
           } else if (json[i].issue_title == 'Third guitar Issue') {
             assert.equal(json[i].issue_title, 'Third guitar Issue');
           } else {
-            console.log("didn't match anything");
+            assert.fail("didn't match anything");
           }
           ++i;
         }
@@ -164,7 +138,8 @@ suite('Functional Tests', function() {
       chai
         .request(server)
         .keepOpen()
-        .get('/api/issues/apitest?open=true&created_by=Joe')
+        .get('/api/issues/apitest')
+        .query({"open": true, "created_by": "Joe"})
         .end(function(err, res) {
           const json = JSON.parse(res.text);
           assert.equal(res.status, 200);
@@ -187,79 +162,46 @@ suite('Functional Tests', function() {
       });
   });
   suite('PUT /api/issues/:project calls', function () {
-    test('Test PUT /api/issues/apitest?_id=xxx.', function(done) {
-      const currentDB = new IssueTracker({
-        'issue_title': 'First Issue',
-        'issue_text': 'When we post data it has an error.',
-        'created_on': new Date(),
-        'updated_on': new Date(),
-        'created_by': 'Joe',
-        'assigned_to': 'Joe',
-        'open': true,
-        'status_text': 'In QA'
-      });
-      currentDB.save((err, info) => {
-        if (info) {
-          const id = currentDB._id.toString();
-          chai
-          .request(server)
-          .keepOpen()
-          .put('/api/issues/apitest')
-          .send({ 
-            "_id": id
-            })
-          .end(function(err, res) {
-            const json = JSON.parse(res.text);
-            assert.equal(res.status, 200);
-            assert.equal(json.error, 'no update field(s) sent');
-            done();
-          })
-        }
-      })
+    test('Test PUT /api/issues/apitest?_id=' + id, function(done) {
+      chai
+        .request(server)
+        .keepOpen()
+        .put('/api/issues/apitest')
+        .send({"_id": id})
+        .end(function(err, res) {
+          const json = JSON.parse(res.text);
+          assert.equal(res.status, 200);
+          assert.equal(json.error, 'no update field(s) sent');
+          done();
+        })
     });
-    test('Test PUT /api/issues/apitest?_id=xxx&issue_title=Error&issue_text=Errors', function(done) {
-      const currentDB = new IssueTracker({
-        'issue_title': 'First Issue',
-        'issue_text': 'When we post data it has an error.',
-        'created_on': new Date(),
-        'updated_on': new Date(),
-        'created_by': 'Joe',
-        'assigned_to': 'Joe',
-        'open': true,
-        'status_text': 'In QA'
-      });
-      currentDB.save((err, info) => {
-        if (info) {
-          const id = currentDB._id.toString();
-          chai
-          .request(server)
-          .keepOpen()
-          .put('/api/issues/apitest')
-          .send({ 
-            "_id": id,
-            "issue_title": "Error",
-            "issue_text": "Errors"
-            })
-          .end(function(err, res) {
-            const json = JSON.parse(res.text);
-            assert.equal(res.status, 200);
-            assert.equal(json.result, 'successfully updated');
-            assert.equal(json._id, id);
-            done();
+    test('Test PUT /api/issues/apitest?_id=' + id + '&issue_title=Error&issue_text=Errors', function(done) {
+      chai
+        .request(server)
+        .keepOpen()
+        .put('/api/issues/apitest')
+        .send({ 
+          _id: id,
+          issue_title: "Faux Issue Title"
           })
-        }
-      })
+        .end(function(err, res) {
+          const json = JSON.parse(res.text);
+          assert.equal(res.status, 200);
+          assert.equal(json.result, 'successfully updated');
+          assert.equal(json._id, id);
+          done();
+        })
     });
     test('Test PUT /api/issues/apitest', function(done) {
       chai
-          .request(server)
-          .keepOpen()
-          .put('/api/issues/apitest')
-          .end(function(err, res) {
-              assert.equal(res.status, 200);
-              assert.equal(res.body.error, 'missing _id');
-              done();
-          })
+        .request(server)
+        .keepOpen()
+        .put('/api/issues/apitest')
+        .end(function(err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.body.error, 'missing _id');
+            done();
+        })
       });
   });
   suite('DELETE /api/issues/:project calls', function () {
@@ -275,64 +217,36 @@ suite('Functional Tests', function() {
           })
     });
     test('Test Delete /api/issues/apitest?_id=xxx', function(done) {
-      const currentDB = new IssueTracker({
-        'issue_title': 'First Issue',
-        'issue_text': 'When we post data it has an error.',
-        'created_on': new Date(),
-        'updated_on': new Date(),
-        'created_by': 'Joe',
-        'assigned_to': 'Joe',
-        'open': true,
-        'status_text': 'In QA'
+      chai
+        .request(server)
+        .keepOpen()
+        .delete('/api/issues/apitest')
+        .send({ 
+          _id: id
+        })
+        .end(function(err, res) {
+          const json = JSON.parse(res.text);
+          assert.equal(res.status, 200);
+          assert.equal(json.result, 'successfully deleted');
+          assert.equal(json._id, id);
+          done();
+        })
       });
-      currentDB.save((err, info) => {
-        if (info) {
-          const id = currentDB._id.toString();
-          chai
-          .request(server)
-          .keepOpen()
-          .delete('/api/issues/apitest')
-          .send({
-            "_id": id 
+    test('Test Delete /api/issues/apitest?_id=xxxx1234', function(done) {
+      chai
+        .request(server)
+        .keepOpen()
+        .delete('/api/issues/apitest')
+        .send({ 
+          _id: id + '1234'
           })
-          .end(function(err, res) {
-            const json = JSON.parse(res.text);
-            assert.equal(res.status, 200);
-            assert.equal(json.result, 'successfully deleted');
-            assert.equal(json._id, id);
-            done();
-          })
-        }})
-      });
-    test('Test Delete /api/issues/apitest?_id=xxx1234', function(done) {
-      const currentDB = new IssueTracker({
-        'issue_title': 'First Issue',
-        'issue_text': 'When we post data it has an error.',
-        'created_on': new Date(),
-        'updated_on': new Date(),
-        'created_by': 'Joe',
-        'assigned_to': 'Joe',
-        'open': true,
-        'status_text': 'In QA'
-      });
-      currentDB.save((err, info) => {
-        if (info) {
-          const id = currentDB._id.toString();
-          chai
-          .request(server)
-          .keepOpen()
-          .delete('/api/issues/apitest')
-          .send({ 
-            "_id": id + '1234'
-            })
-          .end(function(err, res) {
-            const json = JSON.parse(res.text);
-            assert.equal(res.status, 200);
-            assert.equal(json.error, 'could not delete');
-            assert.equal(json._id, id + '1234');
-            done();
-          })
-        }})
+        .end(function(err, res) {
+          const json = JSON.parse(res.text);
+          assert.equal(res.status, 200);
+          assert.equal(json.error, 'could not delete');
+          assert.equal(json._id, id + '1234');
+          done();
+        })
       });
   });
 });
