@@ -49,13 +49,12 @@ const routes = function (app) {
         status_text
       });
 
-      result.save((err, res) => {
-        if (res) {
-          result.save();
+      result.save((err, issue) => {
+        if (issue) {
+          res.setHeader("Access-Control-Allow-Origin", "*");
+          res.send(issue);
         }
       });
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.json(result);
     })
     
     .put(function (req, res){
@@ -73,15 +72,14 @@ const routes = function (app) {
         res.json({ error: 'no update field(s) sent', '_id': id });
         return;
       }
-      
+
+      res.setHeader("Access-Control-Allow-Origin", "*");
       IssueTracker.findByIdAndUpdate(id, input, (err, elem) => {
         if (err) {
-          res.setHeader("Access-Control-Allow-Origin", "*");
           res.json({ result: 'could not update', '_id': id });
           return;
         }
       
-        res.setHeader("Access-Control-Allow-Origin", "*");
         res.json({ result: 'successfully updated', '_id': id });
       });
     })
@@ -96,12 +94,11 @@ const routes = function (app) {
         return;
       }
 
+      res.setHeader("Access-Control-Allow-Origin", "*");
       IssueTracker.findByIdAndDelete(id, (err, elem) => {
         if (err) {
-          res.setHeader("Access-Control-Allow-Origin", "*");
           res.json({ error: 'could not delete', '_id': id });
         } else {
-          res.setHeader("Access-Control-Allow-Origin", "*");
           res.json({ result: 'successfully deleted', '_id': id });
         }
       })
