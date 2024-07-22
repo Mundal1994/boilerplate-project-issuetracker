@@ -204,7 +204,10 @@ suite('Functional Tests', function() {
           chai
           .request(server)
           .keepOpen()
-          .put('/api/issues/apitest?_id=' + id)
+          .put('/api/issues/apitest')
+          .send({ 
+            "_id": id
+            })
           .end(function(err, res) {
             const json = JSON.parse(res.text);
             assert.equal(res.status, 200);
@@ -231,7 +234,12 @@ suite('Functional Tests', function() {
           chai
           .request(server)
           .keepOpen()
-          .put('/api/issues/apitest?_id=' + id + '&issue_title=Error&issue_text=Errors')
+          .put('/api/issues/apitest')
+          .send({ 
+            "_id": id,
+            "issue_title": "Error",
+            "issue_text": "Errors"
+            })
           .end(function(err, res) {
             const json = JSON.parse(res.text);
             assert.equal(res.status, 200);
@@ -283,7 +291,10 @@ suite('Functional Tests', function() {
           chai
           .request(server)
           .keepOpen()
-          .delete('/api/issues/apitest?_id=' + id)
+          .delete('/api/issues/apitest')
+          .send({
+            "_id": id 
+          })
           .end(function(err, res) {
             const json = JSON.parse(res.text);
             assert.equal(res.status, 200);
@@ -310,7 +321,10 @@ suite('Functional Tests', function() {
           chai
           .request(server)
           .keepOpen()
-          .delete('/api/issues/apitest?_id=' + id + '1234')
+          .delete('/api/issues/apitest')
+          .send({ 
+            "_id": id + '1234'
+            })
           .end(function(err, res) {
             const json = JSON.parse(res.text);
             assert.equal(res.status, 200);

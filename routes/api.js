@@ -10,7 +10,8 @@ const issueSchema = new mongoose.Schema({
   assigned_to: {type: String, default: ''},
   open: {type: Boolean, default: true},
   status_text: {type: String, default: ''}}, {
-  timestamps: {createdAt: 'created_on', updatedAt: 'updated_on'}
+  timestamps: {createdAt: 'created_on', updatedAt: 'updated_on'},
+  versionKey: false,
   }
 );
 
@@ -21,7 +22,11 @@ const routes = function (app) {
   app.route('/api/issues/:project')
   
     .get(function (req, res){
-      const input = req.query;
+      let input = {};
+      
+      if (Object.keys(req.query).length > 0) {
+        input = req.query;
+      }      
 
       IssueTracker.find(input, (err, elements) => {
         if (elements) {
@@ -58,16 +63,24 @@ const routes = function (app) {
     })
     
     .put(function (req, res){
-      const input = req.query;
-      const id = input._id;
+      const id = req.body._id;
 
-      if (id == null) {
+      if (!id) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.json({ error: 'missing _id' });
         return;
       }
 
-      if (Object.keys(input).length === 1) {
+      let input = {};
+      for (let key in req.body) {
+        if (key != '_id' && req.body[key]) {
+          input[key] = req.body[key];
+        }
+      }
+      console.log("input", input);
+
+      if (Object.keys(input).length === 0) {
+        console.log("no update fields sent");
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.json({ error: 'no update field(s) sent', '_id': id });
         return;
@@ -75,20 +88,20 @@ const routes = function (app) {
 
       res.setHeader("Access-Control-Allow-Origin", "*");
       IssueTracker.findByIdAndUpdate(id, input, (err, elem) => {
-        if (err) {
-          res.json({ result: 'could not update', '_id': id });
+        if (err || !elem) {
+          console.log("could not update");
+          res.json({ error: 'could not update', '_id': id });
           return;
         }
-      
+        console.log("updated succesfully");
         res.json({ result: 'successfully updated', '_id': id });
       });
     })
     
     .delete(function (req, res){
-      const input = req.query;
-      const id = input._id;
+      const id = req.body._id;
 
-      if (id == null) {
+      if (!id) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.json({ error: 'missing _id' });
         return;
@@ -96,7 +109,7 @@ const routes = function (app) {
 
       res.setHeader("Access-Control-Allow-Origin", "*");
       IssueTracker.findByIdAndDelete(id, (err, elem) => {
-        if (err) {
+        if (err || !elem) {
           res.json({ error: 'could not delete', '_id': id });
         } else {
           res.json({ result: 'successfully deleted', '_id': id });
