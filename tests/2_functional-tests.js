@@ -88,6 +88,18 @@ suite('Functional Tests', function() {
               done();
           })
       });
+      test('Test POST /api/issues/apitest missing required fields', function(done) {
+        chai
+          .request(server)
+          .keepOpen()
+          .post('/api/issues/apitest')
+          .send({})
+          .end(function(err, res) {
+              assert.equal(res.status, 200);
+              assert.equal(res.body.error, 'required field(s) missing');
+              done();
+          })
+      });
   });
   suite('GET /api/issues/:project calls', function () {
     const currentDatabase = [new IssueTracker({
