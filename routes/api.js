@@ -10,7 +10,7 @@ const issueSchema = new mongoose.Schema({
   assigned_to: {type: String, default: ''},
   open: {type: Boolean, default: true},
   status_text: {type: String, default: ''}}, {
-  timestamps: {createdAt: 'created_on', updated_on: 'updated_on'}
+  timestamps: {createdAt: 'created_on', updatedAt: 'updated_on'}
   }
 );
 

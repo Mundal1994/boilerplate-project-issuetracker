@@ -70,6 +70,7 @@ suite('Functional Tests', function() {
               assert.equal(res.body.created_by, 'Joe');
               assert.equal(res.body.assigned_to, '');
               assert.equal(res.body.status_text, '');
+              console.log("res.body.", res.body);
               done();
           })
       });
